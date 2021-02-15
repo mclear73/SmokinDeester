@@ -58,110 +58,41 @@
 		sudo python3 raspi-blinka.py  
 4. If your default Python package is Python2, you will be asked if you want to change to Python3. You want to indicate yes and follow the prompts to update and restart your pi
 
-### Verify I2C and SPI are enabled ###
-1. Log back into your pi once it has rebooted and type the following into terminal:  
-
-		ls /dev/i2c* /dev/spi*
-2. You should get the following response: `/dev/i2c-1 /dev/spidev0.0 /dev/spidev0.1`
-
-### Blinka Test ###
-1. Create a new directory in your home directory titled "SmokinDeester":
+### Install VirtualHub for Yocto-PT100 and Test Connectivity ###
+1. Navigate to the yoctopuce page for the [Yocto-PT100](https://www.yoctopuce.com/EN/products/yocto-pt100). (Link current as of February, 15 2021)
+2. Right-click to the copy the URL from the "Virtual Hub for Linux, Intel + ARM" and run the `wget` command to download the Virtual Hub tool for all Yocto products
+3. You can run the following code below IF THE LINK hasn't changed. Change the url if not working:
 
 		cd ~
-		mkdir SmokinDeester
-2. Navigate into that directory:
+		wget https://www.yoctopuce.com/FR/downloads/VirtualHub.linux.42982.zip
+4. Unzip the file by running (note: filename will differ if the version has changed):
 
-		cd SmokinDeester
-3. create a new file called "BlinkaTest.py" we will use nano to do this:
+		unzip VirtualHub.linux.42982.zip
+5. Run the following to start the RCP-bind:
 
-		nano BlinkaTest.py
-4. This will open a blank text document. Copy and paste the following code into the file:
+		/etc/init.d/rpcbind start
+		/etc/init.d/rpcbind enable
+6. Plugin the Yocto-PT100 into the Raspberry pi using a micro-usb, make sure the Yocto-PT100 is lighting up
+7. Navigate to the armhf directory by: `cd ~/armhf`
+8. Run the Virtual Hub with admin privelages by running the following:
 
-		import board
-		import digitalio
-		import busio
-		 
-		print("Hello blinka!")
-		 
-		# Try to great a Digital input
-		pin = digitalio.DigitalInOut(board.D4)
-		print("Digital IO ok!")
-		 
-		# Try to create an I2C device
-		i2c = busio.I2C(board.SCL, board.SDA)
-		print("I2C ok!")
-		 
-		# Try to create an SPI device
-		spi = busio.SPI(board.SCLK, board.MOSI, board.MISO)
-		print("SPI ok!")
-		 
-		print("done!")
-5. Close the file by pressing **Ctrl + x**
-6. Press **Y** when asked "Save modified Buffer?"
-7. Press **enter**
-8. This will save the file. 
-9. Open the file again to check the contents:
+		sudo ./VirtualHub
+9. You should see the server start. To view the configuration webpage created by Virtual Hub. Open up a browser on your computer and type the IP address of your raspberry pi into your url followed by `:4444`
+	- This will make it so that you are locally looking at port 4444 of your raspberry pi. If this port doesn't work for some reason, you can also try port 4445
+10. You should be able to see your Virtual Hub and your Yocto-Pt100. If you cannot see your Yocto-Pt100 connected, try unplugging and plugging it back in. If that does not work, try a different USB cable. 
+11. Follow the instructions on the Yocto-PT100 Webpage to configure your PT-100 for your particular PT-100 probe
+12. Press Ctrl + c to kill the Yocto server and continue installs
 
-		nano BlinkaTest.py
-10. If the file looks correct, press **Ctrl + x** again to close.
-	- Note: if you did not modify the file, you will not be asked additional questions. 
-11. Run the code to test your installation:
+### Install Yocto-PT100 Python Library ###
+1. From the same [Yocto-PT100 page](https://www.yoctopuce.com/EN/products/yocto-pt100) as above: (Link current as of February, 15 2021)
+2. Right-click to copy the URL from the "Library for Python" file.
+3. You can run the following code below IF THE LINK hasn't changed. Change the url if not working:
 
-		python3 BlinkaTest.py
+		cd ~/SmokinDeester
+		wget https://www.yoctopuce.com/FR/downloads/YoctoLib.python.43781.zip
+4. Unzip the file by running (note: filename will differ if the version has changed):
 
-12. You should see the following:
-
-		Hello blinka!
-		Digital IO ok!
-		I2C ok!
-		SPI ok!
-		done!
-13. Install the max31865 library for python:
-
-		sudo pip3 install adafruit-circuitpython-max31865
-14. Create a new test file to test the max31865 installation:
-
-		nano ~/SmokinDeester/MAXtest.py
-15. Once again, you will get an empty text file. Copy and paste the following code into the file:
-
-		# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
-		# SPDX-License-Identifier: MIT
-		
-		# Simple demo of the MAX31865 thermocouple amplifier.
-		# Will print the temperature every second.
-		import time
-		
-		import board
-		import busio
-		import digitalio
-		
-		import adafruit_max31865
-		
-		
-		# Initialize SPI bus and sensor.
-		spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-		cs = digitalio.DigitalInOut(board.D5)  # Chip select of the MAX31865 board.
-		sensor = adafruit_max31865.MAX31865(spi, cs, wires=3, rtd_nominal=100.0, ref_resistor=430.0)
-		# Note you can optionally provide the thermocouple RTD nominal, the reference
-		# resistance, and the number of wires for the sensor (2 the default, 3, or 4)
-		# with keyword args:
-		# sensor = adafruit_max31865.MAX31865(spi, cs, rtd_nominal=100, ref_resistor=430.0, wires=2)
-		
-		# Main loop to print the temperature every second.
-		while True:
-		    # Read temperature.
-		    temp = sensor.temperature
-		    # Print the value.
-		    print("Temperature: {0:0.3f}C".format(temp))
-		    # Delay for a second.
-		    time.sleep(1.0)
-16. Close the file by pressing **Ctrl + x**
-17. Press **Y**
-18. Press **Enter**
-19. Run the test file:
-
-		python3 ~/SmokinDeester/MAXtest.py
-20. You should see the following continuously printed on your screen:
+		unzip YoctoLib.python.43781.zip
 
 ### Install MongoDB ###
 1. Type in the following into terminal:
