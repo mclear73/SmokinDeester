@@ -98,6 +98,7 @@
 1. Type in the following into terminal:
 
 		sudo apt install mongodb
+		sudo apt-get install mongodb-server
 		sudo systemctl enable mongodb
 		sudo systemctl start mongodb
 2. Check to see if MongoDB installed correctly. Type the following into terminal:
@@ -203,4 +204,44 @@
 		Temp :  61.9°F (Ctrl-C to stop)
 		Temp :  62.0°F (Ctrl-C to stop)
 		Temp :  61.9°F (Ctrl-C to stop)
+
+### Setup Flask Server ###
+1. Install Flask
+
+		pip3 install flask
+2. Install nginx
+
+		sudo apt-get install nginx
+3. Start nginx service
+
+		sudo /etc/init.d/nginx start
+4. Initialize mongodb
+
+		service mongodb start
+5. Follow any steps to initialize
+6. Modify the MongoDB config file:
+
+		sudo nano /etc/mongodb.conf
+7. Comment out the line that says: `bind_ip = 127.0.0.1` and add a line that says `bind_ip = 0.0.0.0`. So it will appear as follows:
+
+		#bind_ip = 127.0.0.1
+		bind_ip = 0.0.0.0
+8. Do not change any other part of the config file 
+
+### Install a few more dependencies ###
+1. We may not use this but it is nice to have pandas installed
+
+		pip3 install pandas
+2. angular-charts.js and Chart.js will be used to display the plots. npm will be used to install these libraries:
+
+		sudo apt-get install npm
+3. Within SmokinDeester, create a directory called "static"
+
+		mkdir static
+4. move to the folder and install the following
+
+		cd ~/SmokinDeester/static
+		npm install angular-chart.js --save
+		npm install angular --save
+		npm install chart.js --save
 
