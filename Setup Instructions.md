@@ -111,3 +111,96 @@
 1. Type the following into terminal:
 
 		sudo pip3 install pymongo
+
+### Yocto PT100 Test Script ###
+1. Create a new python file. I will call mine "yoctoPT100.py". To name yours the same thing. Type the following into the terminal window:
+
+		cd ~/SmokinDeester
+		nano yoctoPT100.py
+2. This will open a blank document. Copy and and paste the following code into the document:
+
+		#!/usr/bin/python
+		# -*- coding: utf-8 -*-
+		import os, sys
+		# add ../../Sources to the PYTHONPATH
+		#CHANGE ME BELOW!!!!!!
+		sys.path.append(os.path.join("/home/pi/SmokinDeester/Sources"))
+		
+		from yocto_api import *
+		from yocto_temperature import *
+		
+		
+		def usage():
+		    scriptname = os.path.basename(sys.argv[0])
+		    print("Usage:")
+			#CHANGE ME BELOW!!!!!!
+		    print(scriptname + ' PT100MK1-10E420')
+			#CHANGE ME BELOW!!!!!!
+		    print(scriptname + ' temp_sensor')
+		    print(scriptname + ' any  ')
+		    sys.exit()
+		
+		
+		def die(msg):
+		    sys.exit(msg + ' (check USB cable)')
+		
+		
+		errmsg = YRefParam()
+		
+		if len(sys.argv) < 2:
+		    usage()
+		
+		target = sys.argv[1]
+		
+		# Setup the API to use local USB devices
+		if YAPI.RegisterHub("usb", errmsg) != YAPI.SUCCESS:
+		    sys.exit("init error" + errmsg.value)
+		
+		if target == 'any':
+		    # retrieve any temperature sensor
+		    sensor = YTemperature.FirstTemperature()
+		    if sensor is None:
+		        die('No module connected')
+		else:
+		    sensor = YTemperature.FindTemperature(target + '.temperature')
+		
+		if not (sensor.isOnline()):
+		    die('device not connected')
+		
+		while sensor.isOnline():
+		    print("Temp :  " + "%2.1f" % sensor.get_currentValue() + "°F (Ctrl-C to stop)")
+		    YAPI.Sleep(1000)
+		YAPI.FreeAPI()
+
+3. Note: You will need to change the lines underneath the comments labeled "CHANGE ME BELOW!!"
+
+- Change this so that the path to the "Source" directory downloaded from the Yocto webpage is in the apostrophes. Your path may be the same if you followed the instructions above. 
+
+		sys.path.append(os.path.join("</home/pi/SmokinDeester/Sources>"))
+- Change this so that the serial number of your specific PT-100 sensor is displayed. To view the serial number, follow the steps listed under the  "Install Yocto-PT100 Python Library" section starting with Step 7. This will run the Yocto server and allow you to configure your Yocto-PT100 sensor, record the serial number, and give the sensor a nickname.
+	- Please Note: you need to specify the number of wires used for your PT100 probe. 
+	- I nicknamed the sensor: `temp_sensor`
+
+			print(scriptname + ' <PT100MK1-10E420>')
+- Change this line so that the nickname you specified is in the apostrophes 
+
+		print(scriptname + ' <temp_sensor>')
+4. Press CTRL + x to close the file
+5. Press y
+6. Press Enter
+7. Once your PT-100 is connected and you have modified the python script, test the script by running:
+
+		sudo python yoctoPT100.py any
+8. You should see the temperature printed on the screen. It will appear like the following: 
+		1. Note: this script is set to report F. Make sure that you configure the sensor to report the correct output temperature by using the Yocto server as described in Step 5 of this section
+
+		pi@raspberrypi:~/SmokinDeester $ sudo python yoctoPT100.py any
+		Temp :  61.9°F (Ctrl-C to stop)
+		Temp :  61.9°F (Ctrl-C to stop)
+		Temp :  61.9°F (Ctrl-C to stop)
+		Temp :  62.0°F (Ctrl-C to stop)
+		Temp :  61.9°F (Ctrl-C to stop)
+		Temp :  61.9°F (Ctrl-C to stop)
+		Temp :  62.0°F (Ctrl-C to stop)
+		Temp :  61.9°F (Ctrl-C to stop)
+
